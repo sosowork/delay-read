@@ -1,74 +1,134 @@
 <template>
   <div class="history">
-    <el-form>
-      <el-form-item>
-        <el-date-picker
-          v-model="formData.time"
-          type="datetime"
-          placeholder="选择提醒时间"
-        >
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" @click="save">保存</el-button>
-      </el-form-item>
-    </el-form>
-    <h1 class="history-title">浏览记录</h1>
-    <ul class="history-list">
-      <li
-        class="history-list-item"
-        v-for="(item, index) in urlList"
-        :key="index"
-        @click="gotoUrl(item.url)"
+    <!-- <el-button slot="reference" type="text"
+      ><i class="el-icon-tickets"></i> 添加到提醒清单</el-button
+    > -->
+    <div class="picker-wrap">
+      <h2 class="site-title">
+        <span>当前页面：</span>
+        <img class="site-icon" :src="curTabInfo.favIconUrl" alt="" />
+        <span>{{ curTabInfo.title }}</span>
+      </h2>
+      <el-date-picker
+        v-model="time"
+        type="datetime"
+        placeholder="选择提醒时间"
+        value-format="timestamp"
+        size="mini"
       >
-        {{ item.title }} | {{ item.time }}
-      </li>
-    </ul>
+      </el-date-picker>
+      &nbsp;&nbsp;
+      <el-button type="text" @click="save" :disabled="!time">保存</el-button>
+    </div>
+
+    <!-- <h1 class="history-title"></h1> -->
+    <el-table :data="urlList" :show-header="false">
+      <el-table-column width="200px">
+        <template slot-scope="scope">
+          <h2 class="site-title">
+            <img class="site-icon" :src="scope.row.favIconUrl" alt="" />
+            <span>{{ scope.row.title }}</span>
+          </h2>
+          <p>提醒时间：{{ scope.row.time | formatTime }}</p>
+        </template>
+      </el-table-column>
+      <el-table-column
+        prop="url"
+        width="230px"
+        :show-overflow-tooltip="true"
+      ></el-table-column>
+      <el-table-column width="50px">
+        <template slot-scope="scope">
+          <el-button type="text" @click="deleteUrl(scope.$index)"
+            >忽略</el-button
+          >
+        </template>
+      </el-table-column>
+      <el-table-column></el-table-column>
+    </el-table>
   </div>
 </template>
 
 <script>
+import dayjs from "dayjs";
 export default {
   name: "App",
   components: {},
   data() {
     return {
-      formData: {
-        time: "",
-        url: "",
+      curTabInfo: {
         title: "",
-        position: {
-          x: 0,
-          y: 0,
-        },
+        url: "",
+        favIconUrl: "",
       },
-      urlList: [],
+      time: "",
+      urlList: [], //保存的链接列表
     };
   },
   beforeMount() {
-    const _this = this;
-    chrome.storage.sync.get(
-      "urlList",
-      function (items) {
-        _this.urlList = items.urlList || [];
-        console.log(items);
-      }.bind(this)
-    );
+    this.getCurTabInfo();
+    this.getUrlListFromStorage();
+  },
+  filters: {
+    formatTime(val) {
+      return dayjs(val).format("MM-DD HH:mm:ss");
+    },
   },
   methods: {
+    getCurTabInfo() {
+      const _this = this;
+      chrome.tabs.getSelected(null, function (tab) {
+        console.log("tab============", tab);
+        Object.keys(_this.curTabInfo).forEach((k) => {
+          _this.curTabInfo[k] = tab[k] || "";
+        });
+      });
+    },
+    //从本地存储获取urlList
+    getUrlListFromStorage() {
+      setInterval(() => {
+        const _this = this;
+        chrome.storage.sync.get(
+          "urlList",
+          function (items) {
+            _this.urlList = items.urlList || [];
+            console.log(items.urlList);
+          }.bind(this)
+        );
+      }, 1000);
+    },
+    // urlList保存到本地
+    setUrlListToStorage() {
+      const _this = this;
+      chrome.storage.sync.set({ urlList: _this.urlList });
+    },
     save() {
       const _this = this;
       chrome.tabs.getSelected(null, function (tab) {
-        console.log(tab);
-        _this.formData.title = tab.title;
-        _this.formData.url = tab.url;
+        const { title, url, favIconUrl } = tab;
+        const item = {
+          url,
+          title,
+          favIconUrl,
+          time: _this.time,
+          id: `${Date.now()}`,
+        };
+        _this.urlList.unshift(item);
+        _this.time = "";
+        _this.$message.success("保存成功~");
+        _this.setUrlListToStorage();
       });
-      console.log(this.urlList);
-      this.urlList.push(this.formData);
-      chrome.storage.sync.set({ urlList: this.urlList });
+    },
+    deleteUrl(index) {
+      this.urlList.splice(index, 1);
+      this.setUrlListToStorage();
     },
     gotoUrl(url) {
       window.open(url);
+    },
+    clear() {
+      this.urlList = [];
+      chrome.storage.clear();
     },
   },
 };
@@ -77,11 +137,24 @@ export default {
 .history {
   padding: 16px;
   // background-color: ;
+  .site-title {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .site-icon {
+    display: inline-block;
+    position: relative;
+    top: -1px;
+    width: 15px;
+    height: 15px;
+    margin-right: 8px;
+  }
 }
 </style>
-<style>
+<style lang="scss">
 html {
-  width: 400px;
+  width: 600px;
   height: 600px;
   background: transparent;
 }

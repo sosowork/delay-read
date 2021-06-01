@@ -3,6 +3,8 @@ import App from "./App.vue";
 import ElementUI from "element-ui";
 import "element-ui/lib/theme-chalk/index.css";
 import "@/common/styles/reset.css";
+import "@/common/styles/element-variables.scss";
+
 Vue.use(ElementUI);
 /* eslint-disable no-new */
 new Vue({

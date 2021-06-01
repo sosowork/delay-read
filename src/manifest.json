@@ -5,10 +5,13 @@
   "description": "A Vue Browser Extension",
   "default_locale": "en",
   "permissions": [
+    "contextMenus",
     "activeTab",
     "<all_urls>",
     "*://*/*",
-    "storage"
+    "storage",
+    "tabs",
+    "notifications"
   ],
   "icons": {
     "16": "icons/16.png",
