@@ -21,14 +21,15 @@ let urlList = [];
       }.bind(this)
     );
     setNoticeTimer();
-  }, 5000);
+  }, 2000);
 })();
 //检查是否需要提醒
 function checkIsNeedNotice(urlList = []) {
   const now = Date.now();
   urlList.forEach((item, index) => {
-    console.log(now, item.time);
-    if (now - item.time < 5000) {
+    var timeDiff = now - item.time
+    console.log(item.title, now, item.time, timeDiff);
+    if (timeDiff > 0 && timeDiff < 3000) {
       toastNotice(item, item.id);
     }
   });
