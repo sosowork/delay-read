@@ -1,16 +1,15 @@
 {
   "manifest_version": 2,
   "name": "delay-read",
-  "homepage_url": "http://localhost:8080/",
-  "description": "A Vue Browser Extension",
+  "description": "A plugin to help you read it later.",
   "default_locale": "en",
   "permissions": [
     "contextMenus",
     "activeTab",
     "<all_urls>",
     "*://*/*",
-    "storage",
     "tabs",
+    "storage",
     "notifications"
   ],
   "icons": {
@@ -37,7 +36,34 @@
     "page": "options.html",
     "browser_style": true
   },
-  "chrome_url_overrides": {
-    "newtab": "override.html"
+  "commands": {
+    "add_delay_read_1": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+1",
+        "mac": "MacCtrl+Shift+1"
+      },
+      "description": "加入延迟阅读清单 - 1min后提醒"
+    },
+    "add_delay_read_5": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+5",
+        "mac": "MacCtrl+Shift+5"
+      },
+      "description": "加入延迟阅读清单 - 5min后提醒"
+    },
+    "add_delay_read_10": {
+      "suggested_key": {
+        "default": "Alt+Shift+1",
+        "mac": "Alt+Shift+1"
+      },
+      "description": "加入延迟阅读清单 - 10min后提醒"
+    },
+    "add_delay_read_30": {
+      "suggested_key": {
+        "default": "Alt+Shift+3",
+        "mac": "Alt+Shift+3"
+      },
+      "description": "加入延迟阅读清单 - 30min后提醒"
+    }
   }
 }

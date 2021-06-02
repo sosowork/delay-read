@@ -40,10 +40,10 @@
     </div>
     <el-divider content-position="left">延迟阅读清单</el-divider>
     <!-- <h1 class="history-title"></h1> -->
-    <el-container style="height: 500px;">
-          <el-scrollbar class="page-scroll">
+    <el-container style="height: 400px">
+      <el-scrollbar class="page-scroll">
         <el-table :data="urlList" :show-header="false">
-          <el-table-column width="315px">
+          <el-table-column width="300px">
             <template slot-scope="scope">
               <div class="div-icon">
                 <img class="site-icon" :src="scope.row.favIconUrl" alt="" />
@@ -64,8 +64,13 @@
         width="230px"
         :show-overflow-tooltip="true"
       ></el-table-column> -->
-          <el-table-column width="50px">
+          <el-table-column width="60px">
             <template slot-scope="scope">
+              <el-button
+                class="el-icon-check"
+                type="text"
+                @click="gotoUrl(scope.$index)"
+              ></el-button>
               <el-button
                 class="el-icon-delete"
                 type="text"
@@ -207,7 +212,7 @@ export default {
     getCurTabInfo() {
       const _this = this;
       chrome.tabs.getSelected(null, function (tab) {
-        console.log("tab============", tab);
+        // console.log("tab============", tab);
         Object.keys(_this.curTabInfo).forEach((k) => {
           _this.curTabInfo[k] = tab[k] || "";
         });
@@ -235,12 +240,14 @@ export default {
       const _this = this;
       chrome.tabs.getSelected(null, function (tab) {
         const { title, url, favIconUrl } = tab;
+        var t = new Date().getTime()
+        var id = t + Math.round(Math.random()*9999999)
         const item = {
           url,
           title,
           favIconUrl,
           time: _this.time,
-          id: `${Date.now()}`,
+          id: `${id}`,
         };
         _this.urlList.unshift(item);
         _this.time = "";
@@ -252,8 +259,10 @@ export default {
       this.urlList.splice(index, 1);
       this.setUrlListToStorage();
     },
-    gotoUrl(url) {
-      window.open(url);
+    gotoUrl(index) {
+      window.open(this.urlList[index].url);
+      this.urlList.splice(index, 1);
+      this.setUrlListToStorage();
     },
     clear() {
       this.urlList = [];
@@ -265,6 +274,7 @@ export default {
 <style lang="scss" scoped>
 .history {
   padding: 16px;
+  overflow-y: hidden;
   // background-color: ;
   .site-title {
     display: flex;
@@ -301,8 +311,9 @@ export default {
 <style lang="scss">
 html {
   width: 400px;
-  height: 500px;
+  height: 400px;
   background: transparent;
+  overflow-y: hidden;
 }
 .el-date-picker .el-picker-panel__content {
   width: 260px !important;
@@ -317,5 +328,8 @@ html {
 
 .page-scroll .el-scrollbar__wrap {
   overflow-x: hidden;
+}
+.el-button+.el-button{
+  margin-left:8px!important;
 }
 </style>

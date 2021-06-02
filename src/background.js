@@ -46,6 +46,9 @@ function toastNotice(item, id) {
 }
 
 chrome.notifications.onClicked.addListener(function (id) {
+  if (id == null) {
+    return;
+  }
   const i = urlList.findIndex((i) => i.id === id);
   if (i > -1) {
     window.open(urlList.find((i) => i.id === id).url);
@@ -53,4 +56,30 @@ chrome.notifications.onClicked.addListener(function (id) {
     chrome.storage.sync.set({ urlList: urlList });
     chrome.notifications.clear(id);
   }
+});
+
+chrome.commands.onCommand.addListener(function (command) {
+  var strTime = command.replace("add_delay_read_", "")
+  chrome.tabs.getSelected(null, function (tab) {
+    const { title, url, favIconUrl } = tab;
+    const item = {
+      url,
+      title,
+      favIconUrl,
+      time: 0,
+      id: `${new Date().getTime() + Math.round(Math.random()*9999999)}`,
+    };
+    item.favIconUrl = item.favIconUrl ? item.favIconUrl : "../icons/16.png";
+    var timestamp =new Date().getTime();
+    item.time = timestamp + parseInt(strTime) * 60 * 1000;
+    urlList.unshift(item);
+    chrome.storage.sync.set({ urlList: urlList });
+  });
+  chrome.notifications.create(null, {
+    type: "basic",
+    iconUrl: "../icons/16.png",
+    title: "延迟阅读",
+    message: "添加成功, " + strTime + "min 后提醒!",
+    requireInteraction: true,
+  });
 });

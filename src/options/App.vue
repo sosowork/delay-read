@@ -1,5 +1,5 @@
 <template>
-  <div>options</div>
+  <div><h3>Version 1.0</h3><h3>The Author Organization 'sosowork'</h3></div>
 </template>
 
 <script>
